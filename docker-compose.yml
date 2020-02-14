@@ -1,0 +1,13 @@
+version: '3.7'
+
+services:
+    local-indy-network:
+        build: ./local-indy-network
+        restart: always
+        ports:
+            - "9701-9708:9701-9708"
+    api-server:
+        build: ./api-server
+        restart: always
+        ports:
+            - "9000:9000"

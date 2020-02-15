@@ -1,13 +1,45 @@
 version: '3.7'
 
+networks:
+    services:
+      ipam:
+        config:
+          - subnet: 10.0.0.0/8
+
 services:
-    local-indy-network:
-        build: ./local-indy-network
+    ledger:
+        # build: ./distributed-ledger
+        build:
+            context: ./distributed-ledger
+            args:
+                - pool_ip=10.0.0.2
         restart: always
         ports:
             - "9701-9708:9701-9708"
-    api-server:
+        networks:
+            services:
+                ipv4_address: 10.0.0.2
+
+    db:
+        build: ./database
+        restart: always
+        ports:
+            - "27017:27017"
+        networks:
+            services:
+                ipv4_address: 10.0.0.3
+
+    api:
         build: ./api-server
+        environment:
+            - TEST_POOL_IP=10.0.0.2
+            - DATABASE_HOST=db
+        depends_on:
+            - ledger
+            - db
         restart: always
         ports:
             - "9000:9000"
+        networks:
+            services:
+                ipv4_address: 10.0.0.4

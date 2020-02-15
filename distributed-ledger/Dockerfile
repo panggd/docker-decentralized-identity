@@ -32,12 +32,15 @@ ARG indy_crypto_ver=0.4.5
 ARG python3_pyzmq_ver=18.1.0
 
 RUN apt-get update -y && apt-get install -y \
-        python3-pyzmq=${python3_pyzmq_ver} \
-        indy-plenum=${indy_plenum_ver} \
-        indy-node=${indy_node_ver} \
-        python3-indy-crypto=${python3_indy_crypto_ver} \
-        libindy-crypto=${indy_crypto_ver} \
-        vim
+    python3-pyzmq=${python3_pyzmq_ver} \
+    indy-plenum=${indy_plenum_ver} \
+    indy-node=${indy_node_ver} \
+    python3-indy-crypto=${python3_indy_crypto_ver} \
+    libindy-crypto=${indy_crypto_ver} \
+    vim
+
+ARG pool_ip
+RUN echo "pool_id $pool_ip"
 
 RUN echo "[supervisord]\n\
 logfile = /tmp/supervisord.log\n\
@@ -57,25 +60,25 @@ childlogdir = /tmp\n\
 strip_ansi = false\n\
 \n\
 [program:node1]\n\
-command=start_indy_node Node1 0.0.0.0 9701 0.0.0.0 9702\n\
+command=start_indy_node Node1 $pool_ip 9701 $pool_ip 9702\n\
 directory=/home/indy\n\
 stdout_logfile=/tmp/node1.log\n\
 stderr_logfile=/tmp/node1.log\n\
 \n\
 [program:node2]\n\
-command=start_indy_node Node2 0.0.0.0 9703 0.0.0.0 9704\n\
+command=start_indy_node Node2 $pool_ip 9703 $pool_ip 9704\n\
 directory=/home/indy\n\
 stdout_logfile=/tmp/node2.log\n\
 stderr_logfile=/tmp/node2.log\n\
 \n\
 [program:node3]\n\
-command=start_indy_node Node3 0.0.0.0 9705 0.0.0.0 9706\n\
+command=start_indy_node Node3 $pool_ip 9705 $pool_ip 9706\n\
 directory=/home/indy\n\
 stdout_logfile=/tmp/node3.log\n\
 stderr_logfile=/tmp/node3.log\n\
 \n\
 [program:node4]\n\
-command=start_indy_node Node4 0.0.0.0 9707 0.0.0.0 9708\n\
+command=start_indy_node Node4 $pool_ip 9707 $pool_ip 9708\n\
 directory=/home/indy\n\
 stdout_logfile=/tmp/node4.log\n\
 stderr_logfile=/tmp/node4.log\n"\
@@ -85,8 +88,6 @@ USER indy
 
 RUN awk '{if (index($1, "NETWORK_NAME") != 0) {print("NETWORK_NAME = \"sandbox\"")} else print($0)}' /etc/indy/indy_config.py> /tmp/indy_config.py
 RUN mv /tmp/indy_config.py /etc/indy/indy_config.py
-
-ARG pool_ip=127.0.0.1
 
 RUN generate_indy_pool_transactions --nodes 4 --clients 5 --nodeNum 1 2 3 4 --ips="$pool_ip,$pool_ip,$pool_ip,$pool_ip"
 

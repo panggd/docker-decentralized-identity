@@ -1,0 +1,29 @@
+############# CREATE WALLETS #############
+# Create a wallet for insurance company
+curl "http://localhost:9000/wallet/create" -X POST \
+-d '{"requestorName": "ABC Insurance", "requestorPassword": "abcabc"}' \
+-H "Content-Type: application/json"
+
+# Create a wallet for hospital company
+curl "http://localhost:9000/wallet/create" -X POST \
+-d '{"requestorName": "XYZ Hospital", "requestorPassword": "xyzxyz"}' \
+-H "Content-Type: application/json"
+
+# Create a wallet for Insurer
+curl "http://localhost:9000/wallet/create" -X POST \
+-d '{"requestorName": "Gin", "requestorPassword": "gintonic"}' \
+-H "Content-Type: application/json"
+
+
+############# CREATE CREDENTIAL SCHEMAS AND DEFINITIONS #############
+# Create an insurance credentials schema
+curl "http://localhost:9000/credential-schema/create" -X POST \
+-d '{"requestorID": "cc050abb-7d00-4cae-8342-f43ce0727279", "credentialSchema": {"name": "policy_holder", "versionID": "0.1", "attributes": ["firstName", "lastName", "age", "gender", "nationalID"]}}' \
+-H "Content-Type: application/json"
+
+curl "http://localhost:9000/credential-schema/create" -X POST \
+-d '{"requestorID": "688f4317-1e7f-4eca-9d46-0a8c3bb5da2e", "credentialSchema": {"name": "medical_invoice", "versionID": "0.1", "attributes": ["firstName", "lastName", "nationalID"]}}' \
+-H "Content-Type: application/json"
+
+
+############# CREATE CREDENTIAL SCHEMAS #############

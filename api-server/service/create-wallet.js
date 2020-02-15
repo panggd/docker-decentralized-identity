@@ -1,5 +1,4 @@
 const uuidv4 = require("uuid/v4");
-const CONSTANTS = require("../config/constants");
 
 const createWallet = async (req, res) => {
   let results = {};
@@ -19,29 +18,16 @@ const createWallet = async (req, res) => {
     };
 
     await ledger.createWallet(config, credentials);
-    const wallet = await ledger.openWallet(config, credentials);
-    const [did, verKey] = await ledger.createAndStoreMyDid(wallet, "{}");
 
     // TODO: Save to db
     applicationData[config.id] = {
       "uid": config.id,
       "name": requestorName,
-      "wallet": wallet,
       "walletConfig": config,
       "walletCredentials": credentials,
-      "did": did,
-      "verKey": verKey
+      "links": {}
     };
-
-    const steward = applicationData[CONSTANTS.STEWARD.NAME];
-
-    let nymRequest = await ledger.buildNymRequest(
-      steward.did, did, verKey, null, "TRUST_ANCHOR");
-    console.log(`Created request to build a NYM request from Steward to ${requestorName}`);
-
-    await ledger.signAndSubmitRequest(
-      applicationData.poolHandle, steward.wallet, steward.did, nymRequest);
-    console.log("Signed and submitted request!");
+    req.app.set("applicationData", applicationData);
 
     results = applicationData[config.id];
 

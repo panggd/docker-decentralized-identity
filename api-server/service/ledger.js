@@ -41,25 +41,27 @@ module.exports = LedgerService = {
         CONSTANTS.STEWARD.CONFIG,
         CONSTANTS.STEWARD.CREDENTIALS);
 
-      let stewardWallet = await ledger.openWallet(
+      const stewardWallet = await ledger.openWallet(
         CONSTANTS.STEWARD.CONFIG,
         CONSTANTS.STEWARD.CREDENTIALS);
 
-      let stewardDidInfo = {
+      const stewardDidInfo = {
         "seed": CONSTANTS.STEWARD.DID_SEED
       };
 
-      let [stewardDid, stewardVerKey] = await ledger.createAndStoreMyDid(
+      const [stewardDid, stewardVerKey] = await ledger.createAndStoreMyDid(
         stewardWallet, stewardDidInfo);
 
-      applicationData[CONSTANTS.STEWARD.NAME] = {
+      applicationData["0"] = {
         "uid": "0",
+        "name": "Steward",
         "wallet": stewardWallet,
         "walletConfig": CONSTANTS.STEWARD.CONFIG,
         "walletCredentials": CONSTANTS.STEWARD.CREDENTIALS,
-        "did": stewardDid,
-        "verKey": stewardVerKey
+        "did": stewardDid
       };
+
+      await ledger.closeWallet(stewardWallet);
     } catch (e) {
       if (e.message !== "WalletAlreadyExistsError") {
         console.log(e);

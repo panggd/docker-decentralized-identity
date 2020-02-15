@@ -11,6 +11,10 @@ const createCredentialSchema = async (req, res) => {
     const requestorID = req.body.requestorID;
     const requestor = applicationData[requestorID];
 
+    const wallet = await ledger.openWallet(
+      requestor.walletConfig,
+      requestor.walletCredentials);
+
     let attributes = [];
     credentialSchema.attributes.forEach((attribute) => {
       attributes.push(attribute);
@@ -37,7 +41,7 @@ const createCredentialSchema = async (req, res) => {
 
     await ledger.signAndSubmitRequest(
       applicationData.poolHandle,
-      requestor.wallet,
+      wallet,
       requestor.did,
       schemaRequest);
     console.log("Signed and submitted schema request");
@@ -47,11 +51,11 @@ const createCredentialSchema = async (req, res) => {
     let getSchemaRequest = await ledger.buildGetSchemaRequest(requestor.did, schemaID);
     let getSchemaResponse = await ledger.submitRequest(applicationData.poolHandle, getSchemaRequest);
     let [getSchemaId, getSchema] = await ledger.parseGetSchemaResponse(getSchemaResponse);
-    console.log(["Got schema response", getSchema]);
+    console.log("Got schema response");
 
     let [credDefID, credDefJson] =
       await ledger.issuerCreateAndStoreCredentialDef(
-        requestor.wallet,
+        wallet,
         requestor.did,
         getSchema, "tag", "CL", "{\"support_revocation\": false}");
 
@@ -60,24 +64,24 @@ const createCredentialSchema = async (req, res) => {
 
     await ledger.signAndSubmitRequest(
       applicationData.poolHandle,
-      requestor.wallet,
+      wallet,
       requestor.did,
       credDefRequest);
     console.log("Signed and submitted credential definition request");
 
+    await ledger.closeWallet(wallet);
+
     // TODO: Save to db
     applicationData[requestor.uid] = requestor;
-    results = requestor;
+    req.app.set("applicationData", applicationData);
 
-    res.status(200);
+    res.status(204);
   } catch (e) {
-    if (e.message !== "WalletAlreadyExistsError") {
-      console.log(e);
-      results = {
-        "message": "Failed to create credential schema."
-      };
-      res.status(500);
-    }
+    console.log(e);
+    results = {
+      "message": "Failed to create credential schema."
+    };
+    res.status(500);
   }
 
   res.append("Content-Type", "application/json");

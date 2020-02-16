@@ -8,7 +8,6 @@ networks:
 
 services:
     ledger:
-        # build: ./distributed-ledger
         build:
             context: ./distributed-ledger
             args:
@@ -19,15 +18,6 @@ services:
         networks:
             services:
                 ipv4_address: 10.0.0.2
-
-    db:
-        build: ./database
-        restart: always
-        ports:
-            - "27017:27017"
-        networks:
-            services:
-                ipv4_address: 10.0.0.3
 
     api:
         build: ./api-server
@@ -42,4 +32,4 @@ services:
             - "9000:9000"
         networks:
             services:
-                ipv4_address: 10.0.0.4
+                ipv4_address: 10.0.0.3

@@ -7,8 +7,8 @@ const verinym = async (req, res) => {
     const fromID = req.body.fromID;
     const toID = req.body.toID;
 
-    const from = applicationData[fromID];
-    const to = applicationData[toID];
+    let from = applicationData[fromID];
+    let to = applicationData[toID];
 
     const fromWallet = await ledger.openWallet(from.walletConfig, from.walletCredentials);
     const toWallet = await ledger.openWallet(to.walletConfig, to.walletCredentials);
@@ -45,11 +45,11 @@ const verinym = async (req, res) => {
       authdecryptedDidInfoJson["did"],
       authdecryptedDidInfoJson["verkey"],
       null, "TRUST_ANCHOR");
-    console.log(`Created request to build a NYM request from ${to.name} to ${from.name}`);
+    console.log(`Created request to build a veriNym NYM request from ${to.name} to ${from.name}`);
 
-    await ledger.signAndSubmitRequest(
+    const toFromRequestResult = await ledger.signAndSubmitRequest(
       applicationData.poolHandle, fromWallet, from.did, toFromNymRequest);
-    console.log("Signed and submitted request!");
+    console.log(["Signed and submitted request", toFromRequestResult]);
 
     to["did"] = authdecryptedDidInfoJson["did"];
     applicationData[toID] = to;

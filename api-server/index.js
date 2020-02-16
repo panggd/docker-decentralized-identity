@@ -7,6 +7,7 @@ const createWallet = require("./service/create-wallet");
 const onboard = require("./service/onboard");
 const verinym = require("./service/verinym");
 const createCredentialSchema = require("./service/create-credential-schema");
+const createCredential = require("./service/create-credential");
 
 const app = express();
 const port = 9000;
@@ -24,6 +25,7 @@ app.post("/wallet/create", async (req, res) => await createWallet(req, res));
 app.post("/onboard", async (req, res) => await onboard(req, res));
 app.post("/verinym", async (req, res) => await verinym(req, res));
 app.post("/credential-schema/create", async (req, res) => await createCredentialSchema(req, res));
+app.post("/credential/create", async (req, res) => await createCredential(req, res));
 
 app.listen(port, async () => {
   [ledger, applicationData] = await LedgerService.initialize(CONSTANTS.POOL_NAME);

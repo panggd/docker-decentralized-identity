@@ -1,4 +1,4 @@
-const requestCredential = async (req, res) => {
+const createCredential = async (req, res) => {
   let results = {};
   try {
     let ledger = req.app.get("ledger");
@@ -46,7 +46,9 @@ const requestCredential = async (req, res) => {
     const decryptedCredentialOffer = JSON.parse(decryptedCredentialOfferJsonBuffer);
     const decryptedCredentialOfferJson = JSON.stringify(decryptedCredentialOffer);
 
-    const toMasterSecretID = await ledger.proverCreateMasterSecret(toWallet, null);
+    const toMasterSecretID = (to["masterSecretID"]) ?
+      to["masterSecretID"] : await ledger.proverCreateMasterSecret(toWallet, null);
+    to["masterSecretID"] = toMasterSecretID;
 
     const getCredDefRequest = await ledger.buildGetCredDefRequest(
       fromToDID, decryptedCredentialOffer["cred_def_id"]);
@@ -103,7 +105,7 @@ const requestCredential = async (req, res) => {
       decryptedCredentialJson,
       credDef, null);
 
-      console.log(`Credentials saved for ${to.name}`);
+    console.log(`Credentials saved for ${to.name}`);
 
     await ledger.closeWallet(fromWallet);
     await ledger.closeWallet(toWallet);
@@ -114,7 +116,7 @@ const requestCredential = async (req, res) => {
   } catch (e) {
     console.log(e);
     results = {
-      "message": "Failed to offer credentials."
+      "message": "Failed to create credentials."
     };
     res.status(500);
   }

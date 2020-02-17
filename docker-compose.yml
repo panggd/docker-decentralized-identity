@@ -26,7 +26,6 @@ services:
             - DATABASE_HOST=db
         depends_on:
             - ledger
-            - db
         restart: always
         ports:
             - "9000:9000"

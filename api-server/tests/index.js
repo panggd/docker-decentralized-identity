@@ -2,6 +2,18 @@ const axios = require("axios");
 
 const index = async () => {
   try {
+
+    const args = process.argv.slice(2);
+    const USE_CASE = args[0];
+
+    switch(USE_CASE) {
+      case "1": console.log("== USE CASE 1: MISSING MEDICAL CLAIM =="); break;
+      case "2": console.log("== USE CASE 2: MEDICAL CLAIM PROOF TAMPERING =="); break;
+      case "0": console.log("== USE CASE 0: NORMAL =="); break;
+      default: console.log(`== USE CASE ${USE_CASE} ==`);
+
+    }
+
     console.log("Creating wallets for steward, insurance, hospital and insurer");
     let idArray = await createWallets();
 
@@ -31,7 +43,7 @@ const index = async () => {
     await createCredentialDefinition(hospital, {
       "name": "medical_invoice",
       "versionID": "0.1",
-      "attributes": ["firstName", "lastName", "nationalID"]
+      "attributes": ["firstName", "lastName", "nationalID", "invoiceNo"]
     });
 
     console.log("Onboard insurer for insurance");
@@ -45,12 +57,14 @@ const index = async () => {
     const lastName = "Garcia";
     const age = "37";
     const gender = "male";
-    const nationalID = "123-45-6789";
+    const nationalID = "123456789";
+    const invoice = "1110002222";
     const firstNameEncoded = "1139481716457488690172217916278103335";
     const lastNameEncoded = "5321642780241790123587902456789123452";
     const ageEncoded = "37";
     const genderEncoded = "5944657099558967239210949258394887428692050081607692519917050";
-    const nationalIDEncoded = "3124141231422543541";
+    const nationalIDEncoded = "123456789";
+    const invoiceEncoded = "1110002222";
 
     console.log("Insurer register for policy with insurance");
     const policyCredentialValues = {
@@ -64,19 +78,47 @@ const index = async () => {
       insurance, gin, "policy_holder", "0.1",
       policyCredentialValues);
 
-    console.log("Insurer get medical invoice from hospital");
-    const medicialInvoiceCredentialValues = {
-      "firstName": { "raw": firstName, "encoded": firstNameEncoded },
-      "lastName": { "raw": lastName, "encoded": lastNameEncoded },
-      "nationalID": { "raw": nationalID, "encoded": nationalIDEncoded }
-    };
-    await createCredential(
-      hospital, gin, "medical_invoice", "0.1",
-      medicialInvoiceCredentialValues);
+    // We do medical invoice for use case 0, 2
+    if (USE_CASE !== "0") {
+      console.log("Insurer get medical invoice from hospital");
+      const medicialInvoiceCredentialValues = {
+        "firstName": { "raw": firstName, "encoded": firstNameEncoded },
+        "lastName": { "raw": lastName, "encoded": lastNameEncoded },
+        "nationalID": { "raw": nationalID, "encoded": nationalIDEncoded },
+        "invoiceNo": { "raw": invoice, "encoded": invoiceEncoded },
+      };
+      await createCredential(
+        hospital, gin, "medical_invoice", "0.1",
+        medicialInvoiceCredentialValues);
+    }
+
+    console.log("Insurer file medical claim to insurance");
+    const credentialDefinitions = {};
+    credentialDefinitions[insurance] = "policy_holder-0.1";
+    credentialDefinitions[hospital] = "medical_invoice-0.1";
+
+    let results;
+    try {
+      let testFraud = (USE_CASE === "2") ? true : false;
+      let response = await createApplication(
+        gin, insurance, hospital,
+        credentialDefinitions, testFraud);
+
+      results = response.data;
+    } catch (e) {
+      if (e.response) {
+        results = e.response.data;
+      }
+    }
+    results = results.message.toUpperCase();
+
+    console.log("\n");
+    console.log(results);
+    console.log("\n");
 
     print();
   } catch (e) {
-    console.error(e, e.stack);
+    console.log(e);
   }
 };
 
@@ -140,6 +182,22 @@ const createCredential = async (
       "schemaName": schemaName,
       "schemaVersion": schemaVersion,
       "credentialValues": credentialValues,
+    }
+  });
+}
+
+const createApplication = async (
+  insurerID, insuranceID, hospitalID,
+  credentialDefinitions, testFraud) => {
+  return await axios({
+    method: "POST",
+    url: "http://localhost:9000/application/create",
+    data: {
+      "insurerID": insurerID,
+      "insuranceID": insuranceID,
+      "hospitalID": hospitalID,
+      "credentialDefinitions": credentialDefinitions,
+      "testFraud": testFraud
     }
   });
 }

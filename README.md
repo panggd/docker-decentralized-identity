@@ -78,7 +78,7 @@ UNABLE TO VERIFY THIS APPLICATION. REASON: UNABLE TO GET CREDENTIAL FOR INVOICEN
 
 ### USE CASE 2 - Tampering proof use case
 This use case is special as it involve tampering the created proof.
-See [create-application.js:L139](./api-server/services/create-application.js)
+See [create-application.js:L139](https://github.com/panggd/docker-decentralized-identity/blob/master/api-server/service/create-application.js#L139)
 1. **Stop and run ./run.sh** to flush and reset the docker container.
 2. At api-server folder, run **node tests 2**
 

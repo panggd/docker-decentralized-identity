@@ -79,7 +79,7 @@ const index = async () => {
       policyCredentialValues);
 
     // We do medical invoice for use case 0, 2
-    if (USE_CASE !== "0") {
+    if (USE_CASE !== "1") {
       console.log("Insurer get medical invoice from hospital");
       const medicialInvoiceCredentialValues = {
         "firstName": { "raw": firstName, "encoded": firstNameEncoded },

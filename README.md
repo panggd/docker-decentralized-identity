@@ -3,16 +3,26 @@
 ### Overview
 This is a project to explore the use case of decentralized identity with HyperLedger Indy.
 
-## Prerequisites
-* NodeJS, latest version
-* NPM,latest version
-* Docker desktop client, latest version
+## Business case
+I am an insurer with an insurance company. I went to the hospital for an op and receive the medical invoice. I take the medical invoice and make the claim to the insurance company.
 
-## Techology Stack
-1. NodeJS, latest version
-2. ExpressJS, latest version
-3. HyperLedger Indy, latest version
-4. Docker, latest version
+## Challenge
+- How can the insurance verify the medical invoice without approaching the hospital?
+- Is there a way to prevent tampering of the invoice in case of false claims?
+
+## Approach
+I decided to use decentralized identity approach to tackle this problem because it do aways the need to have central authority to verify a record. A record in this context will be the policy with the insurance company, the medical invoice with the hospital.
+
+And the underlying decentralized identity datastore is a distributed ledger, which make a record immutable, difficult to tamper.
+
+The nature of distributed ledger also help to decentralize the verification process. Multiple parties in the distributed ledger can help to verify the record. In this context, when I file the medical claim, the existing records with the insurance company and hospital verify the claim behind the scene.
+
+## Challenges
+After initial studies, I identified the key challenges as below:
+
+- All examples in Hyperledger Indy are monolithic, it indicate the need to break down and translate into meaningful microservices.
+
+- How can I make this project portable so someone else can easily deploy and try out.
 
 ## Architecture Design
 ### Microservices
@@ -22,11 +32,26 @@ I decided to approach this from the business perspective and identify what are t
 To understand decentralized identity, HyperLedger Indy seem to be a popular choice. Therefore, I use that as the DL database to store the decentralized identities, credentials, schemas and credential definitions.
 
 ## Further improvements
+- Since there are microservices now, I can build a front-end application to manage activities like onboarding new party, search for a party and list its records in the digital wallet, revoke a record etc.
+
+- Implement a NoSQL database to persist the verification keys. So one can easily retrieve them for verification.
+
 - To scale, it will be good to introduce queues in front of each API endpoint, so this allow to regulate the flow or extend to other work flows.
 
 - Tighten the API endpoint security with OAuth, JWT token.
 
 - In general, take the solution to any cloud provider will be a great idea, there are a lot of managed services that help with infrastructure setup, scaling, security and resource management.
+
+## Prerequisites
+* NodeJS, latest version
+* NPM, latest version
+* Docker desktop client, latest version
+
+## Techology Stack
+1. NodeJS, latest version
+2. ExpressJS, latest version
+3. HyperLedger Indy, latest version
+4. Docker, latest version
 
 ## Initialization
 We need to first run the docker container before testing.
